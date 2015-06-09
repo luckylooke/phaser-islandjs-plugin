@@ -4,4 +4,4 @@ Phaser.io plugin for procedural generation and rendering island maps based on is
 Collaboration welcomed!
 
 #DEMO
-link: luckylooke.github.io/phaser-islandjs-plugin
+[link: luckylooke.github.io/phaser-islandjs-plugin](http://luckylooke.github.io/phaser-islandjs-plugin)
