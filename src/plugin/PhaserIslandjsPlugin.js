@@ -68,6 +68,8 @@ Phaser.Plugin.Island.prototype.init = function (userConfig) {
     this.diagram = null;
     this.sites = [];
     
+    console.log(this.voronoi);
+    
     // Apply userConfig
     for (var prop in userConfig) {
       if (userConfig.hasOwnProperty(prop)) {
@@ -620,6 +622,44 @@ Phaser.Plugin.Island.prototype.renderSites = function() {
         var cell = this.diagram.cells[i];
         ctx.fillText(Math.ceil(this.getRealElevation(cell) * 100),cell.site.x,cell.site.y);
     }
+};
+
+Phaser.Plugin.Island.prototype.renderSite = function(index) {
+    var cell = this.diagram.cells[index],
+        he = cell.halfedges,
+        ctx = this.debugLayer.ctx,
+        point;
+      
+      ctx.font="8px";
+      ctx.fillStyle = '#ff0';
+      
+      ctx.beginPath();
+      ctx.arc(cell.site.x,cell.site.y,2,0,2*Math.PI);
+      ctx.fill();
+      
+     
+      
+      for (var i = 0; i < he.length; i++) {
+        ctx.fillStyle = '#ff0';
+        point = he[i].edge.lSite;
+        ctx.fillText('L'+i,point.x-8,point.y-8);
+        point = he[i].edge.rSite;
+        if(point){
+            ctx.fillText('R'+i,point.x+8,point.y+8);
+        }
+        
+        ctx.fillStyle = '#0f0';
+        point = he[i].getEndpoint();
+        ctx.beginPath();
+        ctx.arc(point.x,point.y,1,0,2*Math.PI);
+        ctx.fill();
+        ctx.fillText('E'+i,point.x-8,point.y-8);
+        point = he[i].getStartpoint();
+        ctx.beginPath();
+        ctx.arc(point.x,point.y,1,0,2*Math.PI);
+        ctx.fill();
+        ctx.fillText('S'+i,point.x+8,point.y+8);
+      }
 };
 
 Phaser.Plugin.Island.prototype.getCellColor = function(cell) {
