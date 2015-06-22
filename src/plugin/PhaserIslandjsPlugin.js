@@ -93,6 +93,7 @@ Phaser.Plugin.Island.prototype.init = function (userConfig) {
     this.assignRivers();
     this.assignMoisture();
     this.assignBiomes();
+    this.treemap == null;
 
 };
 
@@ -134,8 +135,8 @@ Phaser.Plugin.Island.prototype.randomSites = function (n) {
 Phaser.Plugin.Island.prototype.compute = function (sites) {
     this.sites = sites;
     this.voronoi.recycle(this.diagram);
-    var bbox = {xl: 0, xr: this.config.width, yt: 0, yb: this.config.height};
-    this.diagram = this.voronoi.compute(sites, bbox);
+    this.bbox = {xl: 0, xr: this.config.width, yt: 0, yb: this.config.height};
+    this.diagram = this.voronoi.compute(sites, this.bbox);
 };
 
 Phaser.Plugin.Island.prototype.relaxSites = function () {
@@ -726,4 +727,47 @@ Phaser.Plugin.Island.prototype.distance = function(a, b) {
     var dx = a.x - b.x,
         dy = a.y - b.y;
     return Math.sqrt(dx * dx + dy * dy);
+};
+
+Phaser.Plugin.Island.prototype.cellIdFromPoint = function(x, y) {
+	// We build the treemap on-demand
+	if (!this.treemap) {
+		this.treemap = this.buildTreemap();
+	}
+	// Get the Voronoi cells from the tree map given x,y
+	var items = this.treemap.retrieve({body:{x:x,y:y,right:x+1,bottom:y+1}}),
+		iItem = items.length,
+		cells = this.diagram.cells,
+		cell, cellid;
+	while (iItem--) {
+		cellid = items[iItem].cellid;
+		cell = cells[cellid];
+		if (cell.pointIntersection(x,y) > 0) {
+			return cellid;
+		}
+	}
+	return undefined;
+};
+
+Phaser.Plugin.Island.prototype.buildTreemap = function() {
+	var treemap = new Phaser.QuadTree(
+    		this.bbox.xl,
+    		this.bbox.yt,
+    		this.bbox.xr-this.bbox.xl,
+    		this.bbox.yb-this.bbox.yt
+		),
+	    cells = this.diagram.cells,
+		iCell = cells.length,
+		cbox;
+	while (iCell--) {
+	    // https://github.com/photonstorm/phaser/issues/1854
+		cbox = cells[iCell].getBbox();
+		cbox.right = parseInt(cbox.x + cbox.width);
+		cbox.bottom = parseInt(cbox.y + cbox.height);
+		cbox.x = parseInt(cbox.x);
+		cbox.y = parseInt(cbox.y);
+		cbox.cellid = iCell;
+		treemap.insert(cbox);
+	}
+	return treemap;
 };
