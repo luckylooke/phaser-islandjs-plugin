@@ -89,6 +89,7 @@
     lakesThreshold: 0.005, // lake elevation will increase by this value (* the river size) when a new river end inside
     nbRivers: (10000 / 200),
     maxRiversSize: 4,
+    // seed: 168165168, // randomization can be seeded
     shadeOcean: true
   });
   
@@ -97,6 +98,35 @@
   
   // Start rendering
   island.renderNow();
+</code></pre>
+
+<h3><a id="demo" class="anchor" href="#demo" aria-hidden="true"><span class="octicon octicon-link"></span></a>DEMO - debug=true</h3>
+
+<p>Try to click on the map, you will get extra debug info from cell.</p>
+
+</section>
+
+ <div id="phaser-game-debugger"></div>
+
+<section class="main-content">
+  
+<p>Used code for debuged DEMO</p>
+
+<pre><code>
+  function create(){
+    var island = this.game.plugins.add(Phaser.Plugin.Island, {
+          nbSites: 100,
+          perlinWidth: this.game.width/2,
+          perlinHeight: this.game.height/2,
+          allowDebug: true
+      });
+      island.renderNow();
+      this.game.input.onDown.add(function click(pointer) {
+        island.renderSite(island.cellIdFromPoint(pointer.x, pointer.y));
+      });
+  }
+  
+  var game = new Phaser.Game(window.innerWidth, window.innerHeight, Phaser.AUTO, 'phaser-game-debugger', {create: create});
 </code></pre>
 
 
@@ -114,27 +144,12 @@
   <script src="src/plugin/PhaserIslandjsPlugin.js"></script>
   <script src="src/game.js"></script>
 
-    <script type="text/javascript">
-    
-    /* global Phaser */
-    window.onload = function () {
-      function create(){
-          var island = this.game.plugins.add(Phaser.Plugin.Island, {
-            // custom settings
-              perlinWidth: this.game.width/2,
-              perlinHeight: this.game.height/2
-          });
-          // island.DISPLAY_COLORS.OCEAN = '#4444ff';
-          island.renderNow();
-      }
-      
-      var game = new Phaser.Game(window.innerWidth, window.innerHeight, Phaser.AUTO, 'phaser-game', {create: create});
-    };
-    
+  <script type="text/javascript">
     var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
     document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
   </script>
   <script type="text/javascript">
+  /* global _gat */
     try {
       var pageTracker = _gat._getTracker("UA-63917744-1");
     pageTracker._trackPageview();

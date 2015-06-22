@@ -91,6 +91,7 @@ Phaser.Plugin.Island.prototype.init = function (userConfig) {
     this.assignRivers();
     this.assignMoisture();
     this.assignBiomes();
+    this.treemap == null;
 
 };
 
@@ -132,8 +133,8 @@ Phaser.Plugin.Island.prototype.randomSites = function (n) {
 Phaser.Plugin.Island.prototype.compute = function (sites) {
     this.sites = sites;
     this.voronoi.recycle(this.diagram);
-    var bbox = {xl: 0, xr: this.config.width, yt: 0, yb: this.config.height};
-    this.diagram = this.voronoi.compute(sites, bbox);
+    this.bbox = {xl: 0, xr: this.config.width, yt: 0, yb: this.config.height};
+    this.diagram = this.voronoi.compute(sites, this.bbox);
 };
 
 Phaser.Plugin.Island.prototype.relaxSites = function () {
@@ -622,6 +623,44 @@ Phaser.Plugin.Island.prototype.renderSites = function() {
     }
 };
 
+Phaser.Plugin.Island.prototype.renderSite = function(index) {
+    var cell = this.diagram.cells[index],
+        he = cell.halfedges,
+        ctx = this.debugLayer.ctx,
+        point;
+      
+      ctx.font="8px";
+      ctx.fillStyle = '#ff0';
+      
+      ctx.beginPath();
+      ctx.arc(cell.site.x,cell.site.y,2,0,2*Math.PI);
+      ctx.fill();
+      
+     
+      
+      for (var i = 0; i < he.length; i++) {
+        ctx.fillStyle = '#ff0';
+        point = he[i].edge.lSite;
+        ctx.fillText('L'+i,point.x-8,point.y-8);
+        point = he[i].edge.rSite;
+        if(point){
+            ctx.fillText('R'+i,point.x+8,point.y+8);
+        }
+        
+        ctx.fillStyle = '#0f0';
+        point = he[i].getEndpoint();
+        ctx.beginPath();
+        ctx.arc(point.x,point.y,1,0,2*Math.PI);
+        ctx.fill();
+        ctx.fillText('E'+i,point.x-8,point.y-8);
+        point = he[i].getStartpoint();
+        ctx.beginPath();
+        ctx.arc(point.x,point.y,1,0,2*Math.PI);
+        ctx.fill();
+        ctx.fillText('S'+i,point.x+8,point.y+8);
+      }
+};
+
 Phaser.Plugin.Island.prototype.getCellColor = function(cell) {
     var c = this.DISPLAY_COLORS[cell.biome].clone();
     c.brightness = c.brightness - this.getShade(cell);
@@ -686,4 +725,47 @@ Phaser.Plugin.Island.prototype.distance = function(a, b) {
     var dx = a.x - b.x,
         dy = a.y - b.y;
     return Math.sqrt(dx * dx + dy * dy);
+};
+
+Phaser.Plugin.Island.prototype.cellIdFromPoint = function(x, y) {
+	// We build the treemap on-demand
+	if (!this.treemap) {
+		this.treemap = this.buildTreemap();
+	}
+	// Get the Voronoi cells from the tree map given x,y
+	var items = this.treemap.retrieve({body:{x:x,y:y,right:x+1,bottom:y+1}}),
+		iItem = items.length,
+		cells = this.diagram.cells,
+		cell, cellid;
+	while (iItem--) {
+		cellid = items[iItem].cellid;
+		cell = cells[cellid];
+		if (cell.pointIntersection(x,y) > 0) {
+			return cellid;
+		}
+	}
+	return undefined;
+};
+
+Phaser.Plugin.Island.prototype.buildTreemap = function() {
+	var treemap = new Phaser.QuadTree(
+    		this.bbox.xl,
+    		this.bbox.yt,
+    		this.bbox.xr-this.bbox.xl,
+    		this.bbox.yb-this.bbox.yt
+		),
+	    cells = this.diagram.cells,
+		iCell = cells.length,
+		cbox;
+	while (iCell--) {
+	    // https://github.com/photonstorm/phaser/issues/1854
+		cbox = cells[iCell].getBbox();
+		cbox.right = parseInt(cbox.x + cbox.width);
+		cbox.bottom = parseInt(cbox.y + cbox.height);
+		cbox.x = parseInt(cbox.x);
+		cbox.y = parseInt(cbox.y);
+		cbox.cellid = iCell;
+		treemap.insert(cbox);
+	}
+	return treemap;
 };
