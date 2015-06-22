@@ -68,6 +68,8 @@ Phaser.Plugin.Island.prototype.init = function (userConfig) {
     this.diagram = null;
     this.sites = [];
     
+    console.log(this.voronoi);
+    
     // Apply userConfig
     for (var prop in userConfig) {
       if (userConfig.hasOwnProperty(prop)) {
