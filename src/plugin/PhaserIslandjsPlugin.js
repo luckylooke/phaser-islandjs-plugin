@@ -505,7 +505,7 @@ Phaser.Plugin.Island.prototype.renderNow = function () {
     if (this.config.allowDebug) {
         this.renderEdges();
         this.renderSites();
-        this.game.add.sprite(0, 0, this.debugLayer);
+        this.debugLayer.sprite = this.game.add.sprite(0, 0, this.debugLayer);
     }
  
 };
@@ -532,7 +532,7 @@ Phaser.Plugin.Island.prototype.renderCells = function() {
         ctx.stroke();
         ctx.fill();
     }
-    this.game.add.sprite(0, 0, this.cellsLayer);
+    this.cellsLayer.sprite = this.game.add.sprite(0, 0, this.cellsLayer);
 };
 
 Phaser.Plugin.Island.prototype.renderRivers = function() {
@@ -571,7 +571,7 @@ Phaser.Plugin.Island.prototype.renderRivers = function() {
             ctx2.fill();
         }
     }
-    this.game.add.sprite(0, 0, this.riversLayer);
+    this.riversLayer.sprite = this.game.add.sprite(0, 0, this.riversLayer);
 };
 
 Phaser.Plugin.Island.prototype.renderEdges = function() {
