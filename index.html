@@ -8,6 +8,9 @@
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
     <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+    
+    <!--  highlight.js theme  -->
+    <link rel="stylesheet" type="text/css" href="stylesheets/github.css" media="screen">
   </head>
   <body>
     <section class="page-header">
@@ -51,7 +54,8 @@
  <canvas id="perlin" hidden="true"></canvas>
 
 <section class="main-content">
-  
+
+<!-- ------------------------------------------------------------------------------------------------------------------------------------------------------------------ -->  
 <h3><a id="usage" class="anchor" href="#usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Usage</h3>
 
 <p>Dependency files and plugin file need to be loaded before main game code</p>
@@ -100,6 +104,7 @@
   island.renderNow();
 </code></pre>
 
+<!-- ------------------------------------------------------------------------------------------------------------------------------------------------------------------ -->
 <h3><a id="demo" class="anchor" href="#demo" aria-hidden="true"><span class="octicon octicon-link"></span></a>DEMO - debug=true</h3>
 
 <p>Try to click on the map, you will get extra debug info from cell.</p>
@@ -129,6 +134,91 @@
   var game = new Phaser.Game(window.innerWidth, window.innerHeight, Phaser.AUTO, 'phaser-game-debugger', {create: create});
 </code></pre>
 
+<!-- ------------------------------------------------------------------------------------------------------------------------------------------------------------------ -->
+<h3><a id="demo" class="anchor" href="#demo" aria-hidden="true"><span class="octicon octicon-link"></span></a>DEMO - cellular automata</h3>
+
+<p>
+  Would you like to cellular automata on island map cells? Good news, 
+  I have rewritten <a href="http://sanojian.github.io/cellauto/">cellauto.js lib</a> by <a href="http://github.com/sanojian">Jonas Olmstead</a>
+  to <a href="http://gist.github.com/luckylooke/85b0aa072ad8e95f2cef">cellautoVoronoi.js</a> version which can be used here. 
+  You can click on cave icon in first demo above to see it in action. I have used cave example from <a href="http://sanojian.github.io/cellauto/">cellauto.js demo page</a>. 
+  Every click is one step. If you want to restart example, just reload page.
+</p>
+  
+<p>Used code for cave demo</p>
+
+<pre><code>
+  function preload(){
+    this.load.image('cave', 'src/assets/cave.png');
+  }
+  function create(){
+    var island = this.game.plugins.add(Phaser.Plugin.Island, {
+      // custom settings
+        perlinWidth: this.game.width/2,
+        perlinHeight: this.game.height/2
+    });
+    // island.DISPLAY_COLORS.OCEAN = '#4444ff';
+    island.renderNow();
+    
+    function example_caves() {
+  
+    	var cells = island.diagram.cells,
+    	  world = new CAVWorld(cells);
+
+    	world.registerCellType('wall', {
+    		process: function (cellVoronoi) {
+    		  var neighbors = [],
+    		    neighborsIds = cellVoronoi.getNeighborIds(),
+    		    surrounding;
+    		    
+    		  for (var i = neighborsIds.length; i--; ) {
+    		    neighbors.push(cells[neighborsIds[i]]);
+    		  }
+    		  
+    			surrounding = this.countSurroundingCellsWithValue(neighbors, 'wasOpen');
+    			this.open = (this.wasOpen && surrounding >= 3) || surrounding >= 5;
+    		},
+    		reset: function () {
+    			this.wasOpen = this.open;
+    		}
+    	}, function () {
+    		//init
+    		this.open = Math.random() > 0.40;
+    	});
+    
+    	world.initialize([
+    		{ name: 'wall', distribution: 100 }
+    	]);
+    
+    	return world;
+    }
+    
+    var test = example_caves();
+    
+    var testBtnFn = function() {
+      test.step();
+      for (var i = 0; i < test.voronoiCells.length; i++) {
+        // console.log(test.voronoiCells[i].ca.open);
+        var cell = test.voronoiCells[i],
+          ctx = island.cellsLayer.ctx;
+          
+        ctx.fillStyle = cell.ca.open ? '#fff' : '#000';
+        
+        ctx.beginPath();
+        ctx.arc(cell.site.x,cell.site.y,5,0,2*Math.PI);
+        ctx.fill();
+      }
+      island.cellsLayer.dirty = true;
+    };
+    
+    var button = this.game.add.button(95, 400, 'cave', testBtnFn, this, 2, 1, 0);
+      button.fixedToCamera = true;
+      button.cameraOffset.setTo(10, 30);
+    }
+    
+  new Phaser.Game(window.innerWidth, window.innerHeight, Phaser.AUTO, 'phaser-game', {create: create, preload:preload});
+</code></pre>
+
 
       <footer class="site-footer">
         <span class="site-footer-owner"><a href="https://github.com/luckylooke/phaser-islandjs-plugin">Phaser-islandjs-plugin</a> is maintained by <a href="https://github.com/luckylooke">luckylooke</a>.</span>
@@ -139,16 +229,20 @@
     </section>
     
   <script src="src/lib/phaser.js"></script>
+  <script src="src/lib/highlight.pack.js"></script>
   <script src="src/lib/rhill-voronoi-core.min.js"></script>
+  <script src="src/lib/cellautoVoronoi.js"></script>
   <script src="src/plugin/perlin.js"></script>
   <script src="src/plugin/PhaserIslandjsPlugin.js"></script>
   <script src="src/game.js"></script>
 
   <script type="text/javascript">
+    /* global hljs */
+    hljs.initHighlightingOnLoad();
+  
     var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
     document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-  </script>
-  <script type="text/javascript">
+
   /* global _gat */
     try {
       var pageTracker = _gat._getTracker("UA-63917744-1");
