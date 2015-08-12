@@ -17,18 +17,12 @@ window.onload = function () {
   
     	var cells = island.diagram.cells,
     	  world = new CAVWorld(cells);
-
+    
     	world.registerCellType('wall', {
     		process: function (cellVoronoi) {
-    		  var neighbors = [],
-    		    neighborsIds = cellVoronoi.getNeighborIds(),
-    		    surrounding;
-    		    
-    		  for (var i = neighborsIds.length; i--; ) {
-    		    neighbors.push(cells[neighborsIds[i]]);
-    		  }
-    		  
-    			surrounding = this.countSurroundingCellsWithValue(neighbors, 'wasOpen');
+    		  var neighbors = cellVoronoi.neighborsCache || island.getNeighbors(cellVoronoi.site.voronoiId),
+    		    surrounding  = this.countSurroundingCellsWithValue(neighbors, 'wasOpen');
+   
     			this.open = (this.wasOpen && surrounding >= 3) || surrounding >= 5;
     		},
     		reset: function () {
@@ -50,18 +44,23 @@ window.onload = function () {
     
     var testBtnFn = function() {
       test.step();
+      console.log('testBtnFn');
       for (var i = 0; i < test.voronoiCells.length; i++) {
-        // console.log(test.voronoiCells[i].ca.open);
         var cell = test.voronoiCells[i],
-          ctx = island.cellsLayer.ctx;
+          ctx = island.debugLayer.ctx,
+          borders = cell.bordersCache || island.getBorders(cell.site.voronoiId),
+          bLength = borders.length, y;
           
         ctx.fillStyle = cell.ca.open ? '#fff' : '#000';
-        
         ctx.beginPath();
-        ctx.arc(cell.site.x,cell.site.y,5,0,2*Math.PI);
+        ctx.moveTo(borders[0].x,borders[0].y);
+        for (y = 1; y < bLength; y++) {
+          ctx.lineTo(borders[y].x,borders[y].y);
+        }
+        ctx.closePath();
         ctx.fill();
       }
-      island.cellsLayer.dirty = true;
+      island.debugLayer.dirty = true;
     };
     
     var button = this.game.add.button(95, 400, 'cave', testBtnFn, this, 2, 1, 0);
