@@ -661,6 +661,71 @@ Phaser.Plugin.Island.prototype.renderSite = function(index) {
       }
 };
 
+Phaser.Plugin.Island.prototype.getNeighbors = function(index) {
+    var cells = this.diagram.cells,
+        cell = cells[index],
+        neighbors = [],
+  		neighborsIds = cell.getNeighborIds(),
+  		nLength = neighborsIds.length;
+  		    
+  		  for (var i = nLength; i--; ) {
+  		    neighbors.push(cells[neighborsIds[i]]);
+  		  }
+      
+      cell.neighborsCache = neighbors;
+      return neighbors;
+};
+
+Phaser.Plugin.Island.prototype.getBorders = function(index) {
+    var cell = this.diagram.cells[index],
+        he = cell.halfedges,
+        borders = [];
+
+      for (var i = 0; i < he.length; i++) {
+        borders.push(he[i].getStartpoint());
+      }
+      
+	  cell.bordersCache = borders;
+      return borders;
+};
+
+Phaser.Plugin.Island.prototype.cellArea = function(cell) {
+	var area = 0,
+		halfedges = cell.halfedges,
+		iHalfedge = halfedges.length,
+		halfedge,
+		p1, p2;
+	while (iHalfedge--) {
+		halfedge = halfedges[iHalfedge];
+		p1 = halfedge.getStartpoint();
+		p2 = halfedge.getEndpoint();
+		area += p1.x * p2.y;
+		area -= p1.y * p2.x;
+		}
+	area /= 2;
+	cell.areaCache = area;
+	return area;
+};
+
+Phaser.Plugin.Island.prototype.cellCentroid = function(cell) {
+	var x = 0, y = 0,
+		halfedges = cell.halfedges,
+		iHalfedge = halfedges.length,
+		halfedge,
+		v, p1, p2;
+	while (iHalfedge--) {
+		halfedge = halfedges[iHalfedge];
+		p1 = halfedge.getStartpoint();
+		p2 = halfedge.getEndpoint();
+		v = p1.x*p2.y - p2.x*p1.y;
+		x += (p1.x+p2.x) * v;
+		y += (p1.y+p2.y) * v;
+		}
+	v = this.cellArea(cell) * 6;
+	cell.centroidCache = {x:x/v,y:y/v};
+	return cell.centroidCache;
+};
+
 Phaser.Plugin.Island.prototype.getCellColor = function(cell) {
     var c = this.DISPLAY_COLORS[cell.biome].clone();
     c.brightness = c.brightness - this.getShade(cell);
