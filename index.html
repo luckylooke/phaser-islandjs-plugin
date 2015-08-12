@@ -8,6 +8,9 @@
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
     <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+    
+    <!--  highlight.js theme  -->
+    <link rel="stylesheet" type="text/css" href="stylesheets/github.css" media="screen">
   </head>
   <body>
     <section class="page-header">
@@ -226,6 +229,7 @@
     </section>
     
   <script src="src/lib/phaser.js"></script>
+  <script src="src/lib/highlight.pack.js"></script>
   <script src="src/lib/rhill-voronoi-core.min.js"></script>
   <script src="src/lib/cellautoVoronoi.js"></script>
   <script src="src/plugin/perlin.js"></script>
@@ -233,10 +237,12 @@
   <script src="src/game.js"></script>
 
   <script type="text/javascript">
+    /* global hljs */
+    hljs.initHighlightingOnLoad();
+  
     var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
     document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-  </script>
-  <script type="text/javascript">
+
   /* global _gat */
     try {
       var pageTracker = _gat._getTracker("UA-63917744-1");
