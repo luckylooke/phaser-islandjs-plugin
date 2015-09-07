@@ -97,7 +97,7 @@ Phaser.Plugin.Island.prototype.init = function (userConfig) {
 
 Phaser.Plugin.Island.prototype.randomSites = function (n) {
     var sites = [];
-    var rnd = new Phaser.RandomDataGenerator(this.config.seed);
+    var rnd = this.getRandomGenerator(this.config.seed);
 
     // create vertices
     if (this.config.sitesDistribution == 'random') {
@@ -138,7 +138,7 @@ Phaser.Plugin.Island.prototype.compute = function (sites) {
 };
 
 Phaser.Plugin.Island.prototype.relaxSites = function () {
-    var rnd = new Phaser.RandomDataGenerator(this.config.seed);
+    var rnd = this.getRandomGenerator(this.config.seed);
     if (!this.diagram) {
         return;
     }
@@ -278,7 +278,7 @@ Phaser.Plugin.Island.prototype.assignOceanCoastAndLand = function() {
 };
 
 Phaser.Plugin.Island.prototype.assignRivers = function() {
-    var rnd = new Phaser.RandomDataGenerator(this.config.seed);
+    var rnd = this.getRandomGenerator(this.config.seed);
     for (var i = 0; i < this.config.nbRivers;) {
         var cell = this.diagram.cells[rnd.integerInRange(0, this.diagram.cells.length - 1)];
         if (!cell.coast) {
@@ -833,4 +833,11 @@ Phaser.Plugin.Island.prototype.buildTreemap = function() {
 		treemap.insert(cbox);
 	}
 	return treemap;
+};
+
+Phaser.Plugin.Island.prototype.getRandomGenerator = function(seed) {
+    if(seed){
+        seed = Array.isArray(seed) ? seed : [seed];
+    }
+	 return new Phaser.RandomDataGenerator(seed);
 };

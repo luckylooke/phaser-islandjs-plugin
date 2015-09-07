@@ -94,7 +94,7 @@ SimplexNoise.prototype.noise = function(xin, yin) {
 // Park-Miller-Carta Pseudo-Random Number Generator
 /* global Phaser */
 function PRNG(seed) {
-    var rnd = new Phaser.RandomDataGenerator(seed);
+    var rnd = new Phaser.RandomDataGenerator(Array.isArray(seed) ? seed : [seed]);
 	this.seed = rnd.frac() || 1;
 	this.next = function() { return (this.gen() / 2147483647); };
 	this.nextRange = function(min, max)	{ return min + ((max - min) * this.next()) };
