@@ -8,7 +8,8 @@ window.onload = function () {
     var island = this.game.plugins.add(Phaser.Plugin.Island, {
       // custom settings
         perlinWidth: this.game.width/2,
-        perlinHeight: this.game.height/2
+        perlinHeight: this.game.height/2,
+        nbSites: 3000,
     });
     // island.DISPLAY_COLORS.OCEAN = '#4444ff';
     island.renderNow();
