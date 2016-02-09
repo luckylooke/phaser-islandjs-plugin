@@ -630,7 +630,8 @@
     isl.renderSite = function(index) {
         var cell = this.diagram.cells[index],
             he = cell.halfedges,
-            ctx = this.debugLayer.ctx,
+            layer = this.debugLayer,
+            ctx = layer.ctx,
             point;
           
           ctx.font="8px";
@@ -639,8 +640,6 @@
           ctx.beginPath();
           ctx.arc(cell.site.x,cell.site.y,2,0,2*Math.PI);
           ctx.fill();
-          
-         
           
           for (var i = 0; i < he.length; i++) {
             ctx.fillStyle = '#ff0';
@@ -663,6 +662,9 @@
             ctx.fill();
             ctx.fillText('S'+i,point.x+8,point.y+8);
           }
+          
+          layer.dirty = true;
+          layer.render();
     };
     
     isl.getNeighbors = function(index) {
